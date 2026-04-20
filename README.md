@@ -3,10 +3,11 @@
 
 **Author:** Ching Kai Sing, Lucas  
 
-
+[![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=lucas-cks&layout=compact&theme=vision-friendly-dark)](https://github.com/anuraghazra/github-readme-stats)
 
 ![C](https://img.shields.io/badge/Language-C-blue?logo=c)
 ![Python](https://img.shields.io/badge/Language-Python-yellow?logo=python)
+
 ![OpenMP](https://img.shields.io/badge/Parallel-OpenMP-green?logo=openmp)
 ![Numba](https://img.shields.io/badge/JIT-Numba-00A3E0?logo=python)
 
