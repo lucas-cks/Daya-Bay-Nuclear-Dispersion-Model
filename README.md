@@ -217,4 +217,3 @@ Department of Physics, The Chinese University of Hong Kong
 Project link: https://github.com/lucas-cks/A-Simulation-Study-of-a-Hypothetical-Daya-Bay-Nuclear-Incident
 
 [Back to Top](#readme-top)
-```
