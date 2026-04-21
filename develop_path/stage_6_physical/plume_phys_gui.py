@@ -8,7 +8,7 @@ import os
 import tkinter as tk
 from tkinter import ttk
 
-# ========== Increase default font sizes (valid rcParams) ==========
+# Increase default font sizes 
 plt.rcParams['font.size'] = 12
 plt.rcParams['axes.labelsize'] = 14
 plt.rcParams['axes.titlesize'] = 14
@@ -16,7 +16,7 @@ plt.rcParams['xtick.labelsize'] = 10
 plt.rcParams['ytick.labelsize'] = 10
 plt.rcParams['legend.fontsize'] = 10
 
-# ========== Load DLL ==========
+# load dll
 lib_path = "./libplume.dll"
 if not os.path.exists(lib_path):
     raise FileNotFoundError(f"{lib_path} not found. Compile C code first.")
@@ -38,11 +38,10 @@ lib.set_source_strength.argtypes = [ctypes.c_double]
 lib.set_source_strength.restype = None
 lib.get_ground_deposition.argtypes = [ctypes.POINTER(ctypes.c_double)]
 lib.get_ground_deposition.restype = None
-# NEW: precipitation setter
 lib.set_precipitation.argtypes = [ctypes.c_double]
 lib.set_precipitation.restype = None
 
-# ========== Accident database ==========
+# Accident database
 accidents = {
     "Chernobyl (1986, INES 7)": {
         "source_Bq": 5e6,
@@ -81,7 +80,7 @@ accidents = {
     }
 }
 
-# ========== Setup window ==========
+# setup window
 def show_setup_dialog():
     root = tk.Tk()
     root.title("Radioactive Plume Simulation – Select Accident Level")
@@ -159,7 +158,7 @@ def show_setup_dialog():
 source_strength, U_init, V_init = show_setup_dialog()
 print(f"Starting simulation: source strength = {source_strength:.2e} Bq/m³, U = {U_init:.1f} m/s, V = {V_init:.1f} m/s")
 
-# ========== Grid parameters (must match C) ==========
+# Grid parameters
 NX, NY, NZ = 200, 200, 30
 LX, LY, LZ = 100000.0, 100000.0, 5000.0
 DX, DY, DZ = LX/(NX-1), LY/(NY-1), LZ/(NZ-1)
@@ -184,9 +183,9 @@ plane = NX * NY
 
 initial_height = 100.0
 
-# ========== Figure with square aspect ==========
+# Figure with square aspect
 fig, ax = plt.subplots(figsize=(8, 8))
-plt.subplots_adjust(bottom=0.35)   # will be increased later for rain slider? we adjust positions
+plt.subplots_adjust(bottom=0.35)   
 
 img_data = np.zeros((NY, NX))
 norm = colors.LogNorm(vmin=1e-3, vmax=1e7)
@@ -202,14 +201,14 @@ def terrain_height_km(x_km, y_km):
 X, Y = np.meshgrid(x_km, y_km)
 Z_terrain = terrain_height_km(X, Y)
 
-# ----- Colorbar (will be updated when switching view) -----
+# Colorbar
 cb = plt.colorbar(im, ax=ax, label='Concentration (Bq/m³)')
 cb.ax.tick_params(labelsize=10)
 ticks = [1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7]
 cb.set_ticks(ticks)
 cb.set_ticklabels([f'$10^{{{int(np.log10(t))}}}$' for t in ticks])
 
-# INES level markers (only for concentration view)
+# INES level markers 
 ines_levels = [
     (1e6, 'INES 7'),
     (3e5, 'INES 6'),
@@ -233,7 +232,7 @@ ax.set_xlabel('x (km)')
 ax.set_ylabel('y (km)')
 title_text = ax.set_title('Time = 0.0 h, Height = 0 m, Max = 0.00 Bq/m³')
 
-# ----- Sliders -----
+# Sliders
 # Adjust vertical positions to make room for rain slider (bottom=0.35 -> bottom=0.40)
 plt.subplots_adjust(bottom=0.40)
 
@@ -288,7 +287,7 @@ def update_accident_label(val):
 ax_height = plt.axes([0.2, 0.20, 0.6, 0.03])
 slider_height = Slider(ax_height, 'Height (m)', 0.0, 1000.0, valinit=initial_height, valstep=1.0)
 
-# NEW: Rain rate slider
+# Rain rate slider
 ax_rain = plt.axes([0.2, 0.15, 0.6, 0.03])
 slider_rain = Slider(ax_rain, 'Rain rate (mm/h)', 0.0, 50.0, valinit=0.0, valstep=0.1)
 
