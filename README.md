@@ -123,8 +123,8 @@ A-Simulation-Study-of-a-Hypothetical-Daya-Bay-Nuclear-Incident/
 ## 6. Usage
 ### Clone the repository
 ```bash
-git clone https://github.com/lucas-cks/A-Simulation-Study-of-a-Hypothetical-Daya-Bay-Nuclear-Incident.git
-cd A-Simulation-Study-of-a-Hypothetical-Daya-Bay-Nuclear-Incident
+git clone https://github.com/lucas-cks/Daya-Bay-Nuclear-Dispersion-Model.git
+cd Daya-Bay-Nuclear-Dispersion-Model
 ```
 > **Note on Cartopy:** If you encounter issues installing Cartopy on Windows, we recommend using the `Conda` package manager: 
 > `conda install -c conda-forge cartopy`
