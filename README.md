@@ -12,7 +12,7 @@
 ![Numba](https://img.shields.io/badge/JIT-Numba-00A3E0?logo=python)
 ![Tkinter](https://img.shields.io/badge/GUI-Tkinter-lightgrey?logo=python) 
 
-![ctypes](https://img.shields.io/badge/ctypes-Python-3776AB?logo=python&logoColor=white)
+![ctypes](https://img.shields.io/badge/ctypes-Python-3776AB?logo=python&logoColor=yellow)
 ![NumPy](https://img.shields.io/badge/Library-NumPy-013243?logo=numpy&logoColor=white)
 ![Matplotlib](https://img.shields.io/badge/Library-Matplotlib-ffffff?logo=matplotlib&logoColor=black)
 ![Cartopy](https://img.shields.io/badge/Library-Cartopy-4CAF50?logo=python)
