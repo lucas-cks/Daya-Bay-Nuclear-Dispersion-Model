@@ -18,189 +18,195 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## 1. Overview
-This project simulates the atmospheric dispersion of radioactive materials following a hypothetical containment breach at the **Daya Bay Nuclear Power Plant** (Guangdong, China). The model solves the 3D advection–diffusion–decay equation on a high‑resolution Eulerian grid, incorporating complex terrain (Hong Kong region), height‑dependent wind shear, diurnal thermal circulations, and both dry/wet deposition.
+This repository implements a high-resolution 3D Eulerian dispersion model to simulate atmospheric dispersion, deposition, and radioactive decay following a hypothetical containment breach at the **Daya Bay Nuclear Power Plant** (Guangdong, China). The model includes terrain effects (Hong Kong region), vertical wind shear, diurnal thermal circulation, dry and wet deposition, and stochastic turbulence.
 
-Two independent implementations are provided:
-- **C + OpenMP** – Compiled into a shared library (`libplume.dll`) for maximum performance.
-- **Pure Python + Numba** – Just‑in‑time compiled using `numba` for easy experimentation and portability.
+Two independent implementations are included:
+- HPC Solver (C, OpenMP) located in `HPC_Solver_Engine/` – for maximum performance; provided as source and compiled DLL.
+- Vectorised Python (NumPy + Numba) located in `vectorised_python/` – portable and easier to modify/experiment with.
 
-A real‑time interactive GUI (using `matplotlib` and `tkinter`) allows users to adjust wind, source strength, rain rate, and viewing height, and to toggle between concentration and ground deposition maps over a realistic geographic basemap (Cartopy).
+A graphical user interface (matplotlib + tkinter) allows interactive control of wind, source strength, rain rate and viewing height, and toggling between concentration and ground-deposition visualizations over a geographic basemap (Cartopy, if available).
 
 [Back to Top](#readme-top)
 
 ## 2. Physics Background
-The model solves the 3D transport equation:
+The model solves the 3D advection–diffusion–decay equation:
 
-$$\frac{\partial C}{\partial t} + \nabla \cdot (\mathbf{u} C) = \nabla \cdot (K \nabla C) - \lambda C - \Lambda_{\text{dry}} C - \Lambda_{\text{wet}} C$$
+$$
+\frac{\partial C}{\partial t} + \nabla \cdot (\mathbf{u} C) = \nabla \cdot (K \nabla C) - \lambda C - \Lambda_{\text{dry}} C - \Lambda_{\text{wet}} C
+$$
 
-Key phenomena implemented:
+Key processes:
+- Advection — 3D wind field combining a logarithmic profile, Ekman spiral, terrain-induced deceleration and orographic lifting, and an optional diurnal thermal breeze.
+- Diffusion — constant horizontal eddy diffusivity (typical values used) and height-dependent vertical diffusivity K_z(z).
+- Radioactive decay — first-order decay parameter λ (configurable).
+- Dry deposition — surface deposition velocity applied at ground cells.
+- Wet deposition — rain scavenging parameterised proportional to precipitation below cloud base.
+- Terrain — real topography (USGS-derived terrain grid) or a synthetic Gaussian mountain fallback.
+- Thermal circulation — diurnal mountain–valley breeze profile.
+- Stochastic turbulence — simple LCG-based perturbations added to advection for subgrid variability.
 
-- **Advection** – 3D wind field (logarithmic profile + Ekman spiral + orographic lifting + thermal breeze).
-- **Diffusion** – Constant horizontal ($K_x, K_y = 100\,\text{m}^2/\text{s}$) and height‑dependent vertical ($K_z(z)$) eddy diffusivity.
-- **Decay** – First‑order radioactive decay ($\lambda = 1.0\times10^{-6}\,\text{s}^{-1}$).
-- **Dry Deposition** – Constant deposition velocity ($v_d = 0.001\,\text{m/s}$) at ground.
-- **Wet Deposition** – Rain scavenging with rate proportional to precipitation ($\Lambda_{\text{wet}} = \text{PR} \cdot 1.0\times10^{-4}\,\text{s}^{-1}$ below cloud base).
-- **Terrain** – Real topography (USGS data) or a Gaussian mountain fallback; includes flow blocking, orographic lifting, and tangential diversion.
-- **Thermal Circulation** – Diurnal mountain‑valley breeze with maximum vertical velocity $0.3\,\text{m/s}$.
-- **Stochastic Turbulence** – Pseudo‑random fluctuations added to advection via LCG.
-
-The numerical scheme is **Forward in Time, Upwind in Space (FTUS)**. Stability is ensured by satisfying the CFL and diffusion criteria ($\Delta t = 10\,\text{s}$).
+The numerical scheme is Forward-in-Time, Upwind-in-Space (FTUS) with diffusion terms handled appropriately. Time step and grid spacing are chosen to satisfy CFL and diffusion stability criteria.
 
 [Back to Top](#readme-top)
 
 ## 3. Implementation Details
-### Two Parallel Versions
-| Feature | C + OpenMP | Pure Python + Numba |
-|---------|------------|---------------------|
-| Core loops | OpenMP parallel `#pragma omp` | `@jit(nopython=True, parallel=True)` |
-| Wind field recomputation | Every time step | Every time step |
-| Random number generator | LCG (inlined) | LCG (inlined) |
-| Performance | ~10× faster | ~2–3× slower but portable |
-| Compilation | Requires C compiler + DLL creation | No compilation (Numba JIT) |
-| File | `Daya_Bay_HK_Simulation.c` | `shelter.py` |
+### Two Main Implementations
+| Feature | HPC (C + OpenMP) | Vectorised Python (NumPy + Numba) |
+|---------|------------------|------------------------------------|
+| Source files | `HPC_Solver_Engine/daya_bay_HK_simulation.c` | `vectorised_python/shelter.py` |
+| GUI | `HPC_Solver_Engine/daya_bay_gui.py` (wraps DLL) | `vectorised_python/daya_bay.py` (pure Python GUI) |
+| Parallelism | OpenMP `#pragma omp` in core loops | `numba.jit(nopython=True, parallel=True)` in heavy loops |
+| RNG | Inline LCG in C | Inline LCG in Python (Numba) |
+| Performance | Highest (native compiled code) | Portable, easier to read and modify |
+| Binary | `HPC_Solver_Engine/libplume.dll` (provided) | No binary required; runtime JIT via Numba |
 
-### Numerical Grid
-- **Domain:** $113.2\,\text{km} \times 88.6\,\text{km} \times 5\,\text{km}$ (covering Daya Bay to Hong Kong).
-- **Resolution:** $\Delta x \approx 566\,\text{m}$, $\Delta y \approx 443\,\text{m}$, $\Delta z \approx 172\,\text{m}$.
-- **Grid points:** $200 \times 200 \times 30 = 1.2\times10^6$ cells.
-- **Time step:** $\Delta t = 10\,\text{s}$.
+### Numerical Grid (typical configuration)
+- Domain: ~113.2 km (x) × 88.6 km (y) × 5 km (z) (covers Daya Bay → Hong Kong).
+- Resolution: Δx ≈ 566 m, Δy ≈ 443 m, Δz ≈ 172 m (example grid).
+- Grid points: ~200 × 200 × 30 = 1.2×10^6 cells (configurable).
+- Time step: Δt = 10 s (used to satisfy stability criteria).
 
 [Back to Top](#readme-top)
 
 ## 4. Repository Structure
 ```
-daya-bay-plume-simulation/
-├── Daya_Bay_HK_Simulation.c    # C implementation (compiles to libplume.dll)
-├── shelter.py                  # Pure Python + Numba implementation
-├── daya_bay.py                 # Main GUI launcher (imports shelter.py)
-├── DAYA_B~1.PY                 # Alternative GUI for C DLL (uses ctypes)
-├── terrain.bin                 # Real terrain data (USGS, binary double)
-├── terrain_bounds.txt          # Geographic bounds (lon_min, lon_max, lat_min, lat_max, anchor)
-├── README.md                   # This file
-├── LICENSE                     # MIT License
-└── requirements.txt            # Python dependencies
+A-Simulation-Study-of-a-Hypothetical-Daya-Bay-Nuclear-Incident/
+├── HPC_Solver_Engine/
+│   ├── daya_bay_HK_simulation.c   # C solver source (OpenMP)
+│   ├── daya_bay_gui.py            # Python GUI wrapper for compiled DLL
+│   ├── libplume.dll               # Compiled DLL (Windows) — included
+│   ├── terrain.bin                # Terrain binary for solver (USGS grid)
+│   └── terrain_bounds.txt         # Geographic bounds for terrain grid
+├── vectorised_python/
+│   ├── shelter.py                 # Vectorised model (NumPy + Numba)
+│   ├── daya_bay.py                # Pure Python GUI (matplotlib + tkinter)
+│   ├── terrain.bin                # Copy of terrain data used by Python version
+│   └── terrain_bounds.txt
+├── develop_path/                  # development notes / scripts
+├── LICENSE                        # MIT License
+└── README.md                      # This file
 ```
 
 [Back to Top](#readme-top)
 
-## 5. Code Structure
-### C Version (`Daya_Bay_HK_Simulation.c`)
-```text
-main() (not present – compiled to DLL)
-├── init_simulation()
-│   ├── allocate arrays
-│   ├── load terrain.bin or generate Gaussian mountain
-│   ├── build terrain_mask
-│   └── recompute_wind_fields()
-├── step_simulation()
-│   ├── advection/diffusion (upwind + central)
-│   ├── wet deposition (if rain)
-│   ├── boundary conditions
-│   ├── source injection
-│   ├── dry deposition
-│   └── terrain blocking (absorption)
-├── recompute_wind_fields()
-│   ├── logarithmic profile
-│   ├── Ekman spiral
-│   ├── terrain deceleration & orographic lifting
-│   └── thermal circulation
-└── exported functions: set_wind, set_source_strength, get_ground_deposition, etc.
-```
+## 5. Code Structure (high-level)
+### HPC_Solver_Engine (C)
+- daya_bay_HK_simulation.c:
+  - init_simulation(): allocate arrays, load terrain or build Gaussian mountain, build terrain mask, initialize fields.
+  - recompute_wind_fields(): logarithmic profile, Ekman spiral, terrain deceleration, orographic lifting, thermal breeze.
+  - step_simulation(): advection/diffusion update (FTUS/upwind), wet/dry deposition, boundary handling, source injection, terrain absorption.
+  - Exported functions for Python wrapper: set_wind, set_source_strength, get_ground_deposition, step, etc.
+- daya_bay_gui.py:
+  - ctypes wrapper to call functions in `libplume.dll`.
+  - GUI with sliders for wind, source, height, rain; visualization using matplotlib.
 
-### Python Version (`shelter.py` + `daya_bay.py`)
-```text
-PlumeModel class
-├── init_simulation()
-├── step_simulation() → step_simulation_numba()
-├── set_wind() → recompute_wind_fields_numba()
-├── get_state() / get_ground_deposition()
-└── finalize_simulation()
-
-daya_bay.py (GUI)
-├── show_setup_dialog()  (tkinter accident selector)
-├── matplotlib Figure with Cartopy basemap
-├── sliders for U, V, source strength (log), height, rain
-├── buttons: Reset, Pause, Toggle Deposition
-└── FuncAnimation drives step_simulation()
-```
+### Vectorised Python
+- shelter.py:
+  - PlumeModel class encapsulating simulation state and core stepping routines (Numba-accelerated functions).
+  - Methods: init_simulation(), step_simulation(), set_wind(), get_ground_deposition(), finalize().
+- daya_bay.py:
+  - GUI launcher (tkinter dialogs + matplotlib animation).
+  - Interactive controls: U, V, source strength, height, rain; Reset/Pause/Toggle deposition.
 
 [Back to Top](#readme-top)
 
 ## 6. Usage
-### Installation
+### Clone the repository
 ```bash
-git clone https://github.com/lucas-cks/daya-bay-plume-simulation.git
-cd daya-bay-plume-simulation
+git clone https://github.com/lucas-cks/A-Simulation-Study-of-a-Hypothetical-Daya-Bay-Nuclear-Incident.git
+cd A-Simulation-Study-of-a-Hypothetical-Daya-Bay-Nuclear-Incident
 ```
 
-### Option A: Pure Python + Numba (Recommended for most users)
-No compilation required. Install dependencies:
+### Option A — Vectorised Python (recommended for ease of use)
+1. Create a Python 3.8+ environment and install dependencies:
 ```bash
-pip install -r requirements.txt
+python -m venv venv
+source venv/bin/activate      # or venv\Scripts\activate on Windows
+pip install -r vectorised_python/requirements.txt  # or install manually
 ```
-Then run:
-```bash
-python daya_bay.py
-```
-
-### Option B: C + OpenMP (Windows DLL)
-Compile the C code into a shared library:
-```bash
-gcc -shared -fopenmp -static -O2 -o libplume.dll Daya_Bay_HK_Simulation.c -lm
-```
-Then run the wrapper:
-```bash
-python DAYA_B~1.PY
-```
-(Ensure `libplume.dll` is in the same directory.)
-
-### Requirements
-- **Python 3.8+** with:
-  - `numpy`, `matplotlib`, `numba`, `tkinter` (built‑in), `ctypes` (built‑in)
-  - `cartopy` (optional, for realistic basemap; falls back to simple axes)
-- **C compiler** (only for Option B): GCC with OpenMP support.
-
-Install all Python dependencies:
+If no requirements file exists, install:
 ```bash
 pip install numpy matplotlib numba cartopy
 ```
+2. Run the GUI:
+```bash
+python vectorised_python/daya_bay.py
+```
+This runs the pure‑Python GUI and model (Numba JIT acceleration).
+
+### Option B — HPC Solver (C + OpenMP)
+The repository includes a precompiled `libplume.dll` in `HPC_Solver_Engine/` for Windows. To rebuild from source:
+
+Linux / macOS (shared object):
+```bash
+gcc -shared -fopenmp -fPIC -O3 -o libplume.so HPC_Solver_Engine/daya_bay_HK_simulation.c -lm
+```
+
+Windows (MinGW / GCC):
+```bash
+gcc -shared -fopenmp -O2 -o libplume.dll HPC_Solver_Engine/daya_bay_HK_simulation.c -lm
+```
+
+Then run the C GUI wrapper:
+```bash
+python HPC_Solver_Engine/daya_bay_gui.py
+```
+Ensure the shared library (`libplume.dll` or `libplume.so`) is in the same directory as the GUI script, or update the ctypes loader path.
+
+### Requirements summary
+- Python 3.8+:
+  - numpy, matplotlib, numba, cartopy (optional for basemap), tkinter (built-in), ctypes (built-in)
+- C compiler with OpenMP support (only needed to compile the C solver)
+  - gcc, clang (with OpenMP) or MSVC-compatible toolchain
 
 [Back to Top](#readme-top)
 
-## 7. Key Results & Validation
-The model reproduces expected plume behaviour under different meteorological conditions:
+## 7. Example Scenarios & Validation
+The model reproduces expected plume behaviour in representative scenarios:
 
 | Scenario | Wind (U, V) | Rain | Terrain | Observed Effect |
-|----------|-------------|------|---------|------------------|
-| Westward breeze | (-5, 0) m/s | 0 | Real HK | Plume travels toward Hong Kong, partially blocked by Tai Mo Shan |
+|----------|-------------|------|---------|-----------------|
+| Westward breeze | (-5, 0) m/s | 0 | Real HK | Plume advects toward Hong Kong; partial blocking by Tai Mo Shan |
 | Eastward sea breeze | (3, 0) m/s | 0 | Real | Plume disperses over the South China Sea |
-| Heavy rain | (-5, 0) m/s | 20 mm/h | Real | Ground deposition sharply reduced; wet scavenging dominant |
-| No terrain | (-5, 0) m/s | 0 | Gaussian | Symmetric Gaussian‑like plume without orographic deflection |
+| Heavy rain | (-5, 0) m/s | 20 mm/h | Real | Wet scavenging reduces airborne concentration; deposition redistributed |
+| No terrain | (-5, 0) m/s | 0 | Gaussian mountain | Symmetric Gaussian-like plume, no orographic deflection |
 
-### Example output (Pure Python version)
-![Plume concentration](docs/sample_concentration.png)  
-*Simulated concentration at 100 m height after 2 hours, U = -5 m/s, real terrain.*
-
-The model has been tested for numerical stability with $\Delta t = 10\,\text{s}$:
-- Max CFL_x ≈ 0.09, CFL_y ≈ 0.01, CFL_z ≈ 0.02 (well below 1.0)
-- Diffusion numbers < 0.5
+Numerical stability checks (example configuration):
+- Δt = 10 s with CFL_x ≈ 0.09, CFL_y ≈ 0.01, CFL_z ≈ 0.02 (safely < 1.0)
+- Diffusion stability numbers < 0.5
 
 [Back to Top](#readme-top)
 
-## 8. License
-This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
+## 8. Notes on Data and Terrain
+- Terrain provided in `HPC_Solver_Engine/terrain.bin` and `vectorised_python/terrain.bin` (binary double grid) with geographic bounds in `terrain_bounds.txt`. These files were generated from SRTM/USGS sources for the target region.
+- If terrain files are missing, the code can generate a synthetic Gaussian mountain for testing.
 
-## 9. References
+[Back to Top](#readme-top)
+
+## 9. Extending & Modifying
+- To test different atmospheric physics, modify wind-field generation in:
+  - C: `HPC_Solver_Engine/daya_bay_HK_simulation.c` → recompute_wind_fields()
+  - Python: `vectorised_python/shelter.py` → recompute_wind_fields_numba() (or set_wind())
+- To change grid resolution or domain, adjust initialization parameters in the respective init_simulation() functions.
+- Add modules to export 2D/3D output (NetCDF/GRIB) or integrate with GIS tools for post-processing.
+
+[Back to Top](#readme-top)
+
+## 10. License
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+## 11. References
 1. Turner, D. B. (1994). *Workbook of Atmospheric Dispersion Estimates*. CRC Press.
 2. Venkatram, A., & Wyngaard, J. C. (1988). *Lectures on Air Pollution Modeling*. AMS.
-3. USGS EarthExplorer – Terrain data for N22E113, N22E114 (SRTM 1 arc‑second).
-4. Wigner, E. P., & Wilkins, J. E. (1944). *Effect of the Temperature of the Moderator on the Velocity Distribution of Neutrons* – for inspiration on numerical methods.
+3. USGS EarthExplorer – Terrain data (SRTM 1 arc-second) for the study region.
+4. Numerical methods references and atmospheric dispersion literature.
 
-## 10. Contact
-For questions, suggestions, or collaboration, please open an issue on this repository or contact the author directly.
+## 12. Contact
+For questions, suggestions, or collaboration, please open an issue on this repository or contact the author.
 
 **Ching Kai Sing, Lucas**  
 Department of Physics, The Chinese University of Hong Kong  
-*Project Link:* [https://github.com/lucas-cks/daya-bay-plume-simulation](https://github.com/lucas-cks/daya-bay-plume-simulation)
+Project link: https://github.com/lucas-cks/A-Simulation-Study-of-a-Hypothetical-Daya-Bay-Nuclear-Incident
 
 [Back to Top](#readme-top)
+```
