@@ -1,11 +1,6 @@
 import numpy as np
 import math
 from numba import jit, prange
-import os
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-terrain_path = os.path.join(current_dir, "..", "..", "data", "terrain.bin")
-
 
 # Parameters 
 NX, NY, NZ = 200, 200, 30
@@ -301,8 +296,6 @@ class PlumeModel:
         
         # Load terrain
         try:
-            
-           if os.path.exists(terrain_path): 
             with open("terrain.bin", "rb") as f:
                 data = np.fromfile(f, dtype=np.float64, count=NX*NY)
                 if data.size == NX*NY:
