@@ -125,6 +125,8 @@ A-Simulation-Study-of-a-Hypothetical-Daya-Bay-Nuclear-Incident/
 git clone https://github.com/lucas-cks/A-Simulation-Study-of-a-Hypothetical-Daya-Bay-Nuclear-Incident.git
 cd A-Simulation-Study-of-a-Hypothetical-Daya-Bay-Nuclear-Incident
 ```
+> **Note on Cartopy:** If you encounter issues installing Cartopy on Windows, we recommend using the `Conda` package manager: 
+> `conda install -c conda-forge cartopy`
 
 ### Option A — Vectorised Python (recommended for ease of use)
 1. Create a Python 3.8+ environment and install dependencies:
