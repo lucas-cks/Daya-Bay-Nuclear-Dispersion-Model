@@ -10,11 +10,11 @@
 
 ![OpenMP](https://img.shields.io/badge/Parallel-OpenMP-green?logo=openmp)
 ![Numba](https://img.shields.io/badge/JIT-Numba-00A3E0?logo=python)
+![Tkinter](https://img.shields.io/badge/GUI-Tkinter-lightgrey?logo=python) 
 
 ![NumPy](https://img.shields.io/badge/Library-NumPy-013243?logo=numpy&logoColor=white)
 ![Matplotlib](https://img.shields.io/badge/Library-Matplotlib-ffffff?logo=matplotlib&logoColor=black)
 ![Cartopy](https://img.shields.io/badge/Library-Cartopy-4CAF50?logo=python)
-![Tkinter](https://img.shields.io/badge/GUI-Tkinter-lightgrey?logo=python) 
 ![math](https://img.shields.io/badge/Library-math-blue?logo=python)
 ![os](https://img.shields.io/badge/Library-os-green?logo=python) 
 
