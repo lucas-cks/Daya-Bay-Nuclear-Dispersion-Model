@@ -97,7 +97,7 @@ A-Simulation-Study-of-a-Hypothetical-Daya-Bay-Nuclear-Incident/
 
 [Back to Top](#readme-top)
 
-## 5. Code Structure (high-level)
+## 5. Code Structure 
 ### HPC_Solver_Engine (C)
 - daya_bay_HK_simulation.c:
   - init_simulation(): allocate arrays, load terrain or build Gaussian mountain, build terrain mask, initialize fields.
