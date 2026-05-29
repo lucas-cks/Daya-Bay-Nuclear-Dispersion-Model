@@ -211,8 +211,6 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 ## 12. Contact
 For questions, suggestions, or collaboration, please open an issue on this repository or contact the author.
 
-**Ching Kai Sing, Lucas**  
-Department of Physics, The Chinese University of Hong Kong  
 Project link: [https://github.com/lucas-cks/Daya-Bay-Nuclear-Dispersion-Model](https://github.com/lucas-cks/Daya-Bay-Nuclear-Dispersion-Model)
 
 [Back to Top](#readme-top)
