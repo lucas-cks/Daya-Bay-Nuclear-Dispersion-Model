@@ -146,7 +146,7 @@ print(f"Starting simulation: source strength = {source_strength:.2e} Bq/m³, U =
 
 # grid parameters
 NX, NY, NZ = 200, 200, 30
-LX, LY, LZ = 100000.0, 100000.0, 5000.0
+LX, LY, LZ = 113200.0, 88600.0, 5000.0
 DX, DY, DZ = LX/(NX-1), LY/(NY-1), LZ/(NZ-1)
 x_km = np.linspace(0, LX/1000, NX)
 y_km = np.linspace(0, LY/1000, NY)
@@ -156,7 +156,6 @@ if os.path.exists("terrain.bin"):
     terrain_z = np.fromfile("terrain.bin", dtype=np.float64).reshape(NY, NX)
     print("Loaded real terrain from terrain.bin")
     # Vertical flip 
-    terrain_z = np.flipud(terrain_z)
 
 else:
     # Fallback Gaussian mountain
