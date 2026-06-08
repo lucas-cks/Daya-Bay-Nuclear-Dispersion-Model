@@ -364,7 +364,7 @@ EXPORT void step_simulation(void) {
                 // LCG RNG 
                 unsigned int seed = (unsigned int)((unsigned int)i * 73856093u + (unsigned int)j * 19349663u + (unsigned int)k * 83492791u + (unsigned int)step * 10234567u);
                 seed = seed * 1103515245 + 12345;
-                double random = (double)(seed & 0x7fffffff) / (double)0x7fffffff; // [0,1)
+                double random = (double)(seed & 0x7fffffff) / (double)0x7fffffff; // [0,1]
 
                 double u_local = U_field[idx];
                 double v_local = V_field[idx];
