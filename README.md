@@ -1,8 +1,6 @@
 # Atmospheric Transport of Radioactive Materials
 ## A Simulation Study of a Hypothetical Daya Bay Nuclear Incident
 
-**Author:** Ching Kai Sing, Lucas  
-
 ![C](https://img.shields.io/badge/Language-C-blue?logo=c)
 ![Python](https://img.shields.io/badge/Language-Python-yellow?logo=python)
 
