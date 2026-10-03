@@ -64,7 +64,7 @@ The engine strictly adheres to the following conditions to ensure mathematical c
 | Parallelism | OpenMP `#pragma omp` in core loops | `numba.jit(nopython=True, parallel=True)` in heavy loops |
 | RNG | Inline LCG in C | Inline LCG in Python (Numba) |
 | Performance | Higher (native compiled code) | Portable, easier to read and modify |
-| Binary | `HPC_Solver_Engine/libplume.dll` (provided) | No binary required; runtime JIT via Numba |
+| Binary | `c_openmp_with_python_gui/libplume.dll` (provided) | No binary required; runtime JIT via Numba |
 
 ### Numerical Grid (typical configuration)
 - Domain: ~113.2 km (x) × 88.6 km (y) × 5 km (z) (covers Daya Bay → Hong Kong).
