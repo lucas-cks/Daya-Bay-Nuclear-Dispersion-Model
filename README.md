@@ -57,13 +57,13 @@ The engine strictly adheres to the following conditions to ensure mathematical c
 
 ## 3. Implementation Details
 ### Two Main Implementations
-| Feature | HPC (C + OpenMP) | Vectorised Python (NumPy + Numba) |
+| Feature | C + OpenMP | Pure Python |
 |---------|------------------|------------------------------------|
-| Source files | `HPC_Solver_Engine/daya_bay_HK_simulation.c` | `vectorised_python/shelter.py` |
-| GUI | `HPC_Solver_Engine/daya_bay_gui.py` (wraps DLL) | `vectorised_python/daya_bay.py` (pure Python GUI) |
+| Source files | `c_openmp_with_python_gui/daya_bay_HK_simulation.c` | `pure_python/shelter.py` |
+| GUI | `c_openmp_with_python_gui/daya_bay_gui.py` (wraps DLL) | `pure_python/daya_bay.py` (pure Python GUI) |
 | Parallelism | OpenMP `#pragma omp` in core loops | `numba.jit(nopython=True, parallel=True)` in heavy loops |
 | RNG | Inline LCG in C | Inline LCG in Python (Numba) |
-| Performance | Highest (native compiled code) | Portable, easier to read and modify |
+| Performance | Higher (native compiled code) | Portable, easier to read and modify |
 | Binary | `HPC_Solver_Engine/libplume.dll` (provided) | No binary required; runtime JIT via Numba |
 
 ### Numerical Grid (typical configuration)
