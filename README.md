@@ -21,8 +21,8 @@
 This repository implements a high-resolution 3D Eulerian dispersion model to simulate atmospheric dispersion, deposition, and radioactive decay following a hypothetical containment breach at the **Daya Bay Nuclear Power Plant** (Guangdong, China). The model includes terrain effects (Hong Kong region), vertical wind shear, diurnal thermal circulation, dry and wet deposition, and stochastic turbulence.
 
 Two independent implementations are included:
-- HPC Solver (C, OpenMP) located in `HPC_Solver_Engine/` – for maximum performance; provided as source and compiled DLL.
-- Vectorised Python (NumPy + Numba) located in `vectorised_python/` – portable and easier to modify/experiment with.
+- C and Python version (C, OpenMP) located in `c_openmp_with_python_gui/` – for higher performance; provided as source and compiled DLL.
+- Pure Python Version (NumPy + Numba) located in `pure_python/` – portable and easier to modify with.
 
 A graphical user interface (matplotlib + tkinter) allows interactive control of wind, source strength, rain rate and viewing height, and toggling between concentration and ground-deposition visualizations over a geographic basemap (Cartopy, if available).
 
